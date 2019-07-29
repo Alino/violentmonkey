@@ -15,6 +15,7 @@ import {
 } from './notifications';
 import { onTabCreate, onTabClosed } from './tabs';
 import { onDownload } from './download';
+import Oidc from 'oidc-client';
 
 let state = 0;
 
@@ -213,6 +214,17 @@ function wrapGM(script, code, cache, unsafeWindow) {
   const gmFunctions = {
     unsafeWindow: { value: unsafeWindow },
     GM_info: { value: gmInfo },
+    GM_oidc: {
+      value(loginSettings) {
+        if (loginSettings) {
+          if (loginSettings.userStore === undefined) {
+            loginSettings.userStore = new Oidc.WebStorageStateStore({ store: window.localStorage });
+          }
+          return new Oidc.UserManager(loginSettings);
+        }
+        return false;
+      },
+    },
     GM_deleteValue: {
       value(key) {
         const value = loadValues();
